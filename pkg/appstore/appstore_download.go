@@ -32,12 +32,10 @@ type DownloadOutput struct {
 }
 
 func (t *appstore) Download(input DownloadInput) (DownloadOutput, error) {
-	macAddr, err := t.machine.MacAddress()
+	guid, err := t.getGuid()
 	if err != nil {
-		return DownloadOutput{}, fmt.Errorf("failed to get mac address: %w", err)
+		return DownloadOutput{}, fmt.Errorf("failed to get GUID: %w", err)
 	}
-
-	guid := strings.ReplaceAll(strings.ToUpper(macAddr), ":", "")
 
 	req := t.downloadRequest(input.Account, input.App, guid, input.ExternalVersionID)
 
