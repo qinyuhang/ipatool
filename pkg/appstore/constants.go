@@ -25,4 +25,6 @@ const (
 
 	PricingParameterAppStore    = "STDQ"
 	PricingParameterAppleArcade = "GAME"
+
+	AccountKey = "account"
 )

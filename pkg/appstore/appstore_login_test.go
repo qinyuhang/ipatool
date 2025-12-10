@@ -248,9 +248,9 @@ var _ = Describe("AppStore (Login)", func() {
 			When("fails to save account in keychain", func() {
 				BeforeEach(func() {
 					mockKeychain.EXPECT().
-						Set("account", gomock.Any()).
+						Set(AccountKey, gomock.Any()).
 						Do(func(key string, data []byte) {
-							want := Account{
+							wantAccount := Account{
 								Name:                fmt.Sprintf("%s %s", testFirstName, testLastName),
 								Email:               testEmail,
 								PasswordToken:       testPasswordToken,
@@ -258,13 +258,22 @@ var _ = Describe("AppStore (Login)", func() {
 								DirectoryServicesID: testDirectoryServicesID,
 								StoreFront:          testStoreFront,
 							}
+							want := AccountStorage{
+								Accounts: []Account{wantAccount},
+								Current:  testEmail,
+							}
 
-							var got Account
+							var got AccountStorage
 							err := json.Unmarshal(data, &got)
 							Expect(err).ToNot(HaveOccurred())
 							Expect(got).To(Equal(want))
 						}).
-						Return(errors.New(""))
+						Return(errors.New("")).
+						AnyTimes()
+					mockKeychain.EXPECT().
+						Get(AccountKey).
+						Return([]byte{}, nil).
+						AnyTimes()
 				})
 
 				It("returns error", func() {
@@ -278,9 +287,9 @@ var _ = Describe("AppStore (Login)", func() {
 			When("successfully saves account in keychain", func() {
 				BeforeEach(func() {
 					mockKeychain.EXPECT().
-						Set("account", gomock.Any()).
+						Set(AccountKey, gomock.Any()).
 						Do(func(key string, data []byte) {
-							want := Account{
+							wantAccount := Account{
 								Name:                fmt.Sprintf("%s %s", testFirstName, testLastName),
 								Email:               testEmail,
 								PasswordToken:       testPasswordToken,
@@ -289,18 +298,28 @@ var _ = Describe("AppStore (Login)", func() {
 								StoreFront:          testStoreFront,
 							}
 
-							var got Account
+							want := AccountStorage{
+								Accounts: []Account{wantAccount},
+								Current:  testEmail,
+							}
+
+							var got AccountStorage
 							err := json.Unmarshal(data, &got)
 							Expect(err).ToNot(HaveOccurred())
 							Expect(got).To(Equal(want))
 						}).
-						Return(nil)
+						Return(nil).
+						AnyTimes()
+					mockKeychain.EXPECT().
+						Get(AccountKey).
+						AnyTimes()
 				})
 
 				It("returns nil", func() {
 					out, err := as.Login(LoginInput{
 						Password: testPassword,
 					})
+					fmt.Println("FK err", err)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(out.Account.Email).To(Equal(testEmail))
 					Expect(out.Account.Name).To(Equal(strings.Join([]string{testFirstName, testLastName}, " ")))

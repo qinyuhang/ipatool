@@ -1,7 +1,6 @@
 package appstore
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	gohttp "net/http"
@@ -105,17 +104,7 @@ func (t *appstore) login(email, password, authCode, guid string) (Account, error
 		Password:            password,
 	}
 
-	data, err := json.Marshal(acc)
-	if err != nil {
-		return Account{}, fmt.Errorf("failed to marshal json: %w", err)
-	}
-
-	err = t.keychain.Set("account", data)
-	if err != nil {
-		return Account{}, fmt.Errorf("failed to save account in keychain: %w", err)
-	}
-
-	return acc, nil
+	return t.saveAccount(acc)
 }
 
 func (t *appstore) parseLoginResponse(res *http.Result[loginResult], attempt int, authCode string) (bool, string, error) {
