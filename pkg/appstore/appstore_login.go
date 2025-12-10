@@ -14,6 +14,8 @@ import (
 
 var (
 	ErrAuthCodeRequired = errors.New("auth code is required")
+	AccountStorageKey   = "account_storage"
+	AccountKey          = "account"
 )
 
 type LoginInput struct {
@@ -110,9 +112,41 @@ func (t *appstore) login(email, password, authCode, guid string) (Account, error
 		return Account{}, fmt.Errorf("failed to marshal json: %w", err)
 	}
 
-	err = t.keychain.Set("account", data)
+	err = t.keychain.Set(AccountKey, data)
 	if err != nil {
 		return Account{}, fmt.Errorf("failed to save account in keychain: %w", err)
+	}
+
+	// Save an array of accounts by email
+	// Save in the format of
+	// {
+	//   "accounts": {
+	//     email1: { ...account... },
+	//	   email2: { ...account... }
+	//   },
+	//  "current": ""
+	// }
+	// Also save under email-specific key
+	rootData, err := t.keychain.Get(AccountStorageKey)
+	if err != nil {
+		// Ignore error if account does not exist yet
+	}
+	var accountStorage AccountStorage
+	err = json.Unmarshal(rootData, &accountStorage)
+
+	if err != nil {
+		return Account{}, NewErrorWithMetadata(fmt.Errorf(""), res)
+	}
+	accountStorage.Accounts = append(accountStorage.Accounts, acc)
+	accountStorage.Current = acc.Email
+
+	rootData, err = json.Marshal(accountStorage)
+	if err != nil {
+		return Account{}, fmt.Errorf("failed to marshal json: %w", err)
+	}
+	err = t.keychain.Set(AccountStorageKey, rootData)
+	if err != nil {
+		return Account{}, fmt.Errorf("failed to save account storage in keychain: %w", err)
 	}
 
 	return acc, nil

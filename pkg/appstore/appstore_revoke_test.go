@@ -31,7 +31,7 @@ var _ = Describe("AppStore (Revoke)", func() {
 	When("keychain removes item", func() {
 		BeforeEach(func() {
 			mockKeychain.EXPECT().
-				Remove("account").
+				Remove(AccountKey).
 				Return(nil)
 		})
 
@@ -44,7 +44,7 @@ var _ = Describe("AppStore (Revoke)", func() {
 	When("keychain returns error", func() {
 		BeforeEach(func() {
 			mockKeychain.EXPECT().
-				Remove("account").
+				Remove(AccountKey).
 				Return(errors.New(""))
 		})
 

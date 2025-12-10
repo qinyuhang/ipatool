@@ -24,6 +24,8 @@ func authCmd() *cobra.Command {
 	cmd.AddCommand(loginCmd())
 	cmd.AddCommand(infoCmd())
 	cmd.AddCommand(revokeCmd())
+	cmd.AddCommand(listAccountsCmd())
+	cmd.AddCommand(switchAccountCmd())
 
 	return cmd
 }
@@ -166,4 +168,48 @@ func revokeCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func listAccountsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List saved App Store accounts",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			data, err := dependencies.AppStore.AccountsInfo()
+			if err != nil {
+				return err
+			}
+
+			for _, acc := range data.Accounts {
+				dependencies.Logger.Log().
+					Str("name", acc.Name).
+					Str("email", acc.Email)
+			}
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+// IF provider with -e --email, then switch to that account
+// if not provided, list accounts and prompt user to select one
+func switchAccountCmd() *cobra.Command {
+	var email string
+	cmd := &cobra.Command{
+		Use:   "switch",
+		Short: "Switch to a different App Store account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if email == "" {
+				listAccountsCmd()
+			}
+			fmt.Printf("Call Switch account function to switch to %s\n", email)
+			return nil
+			// return dependencies.AccountManager.SwitchAccount(cmd.Context(), email)
+		},
+	}
+
+	cmd.Flags().StringVarP(&email, "email", "e", "", "email address for the Apple ID (required)")
+
+	return cmd
 }

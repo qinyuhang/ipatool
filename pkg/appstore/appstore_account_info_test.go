@@ -37,7 +37,7 @@ var _ = Describe("AppStore (AccountInfo)", func() {
 
 		BeforeEach(func() {
 			mockKeychain.EXPECT().
-				Get("account").
+				Get(AccountKey).
 				Return([]byte(fmt.Sprintf("{\"email\": \"%s\", \"name\": \"%s\"}", testEmail, testName)), nil)
 		})
 
@@ -52,7 +52,7 @@ var _ = Describe("AppStore (AccountInfo)", func() {
 	When("keychain returns error", func() {
 		BeforeEach(func() {
 			mockKeychain.EXPECT().
-				Get("account").
+				Get(AccountKey).
 				Return([]byte{}, errors.New(""))
 		})
 
@@ -65,7 +65,7 @@ var _ = Describe("AppStore (AccountInfo)", func() {
 	When("keychain returns invalid data", func() {
 		BeforeEach(func() {
 			mockKeychain.EXPECT().
-				Get("account").
+				Get(AccountKey).
 				Return([]byte("..."), nil)
 		})
 

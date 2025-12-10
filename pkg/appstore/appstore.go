@@ -12,6 +12,8 @@ type AppStore interface {
 	Login(input LoginInput) (LoginOutput, error)
 	// AccountInfo returns the information of the authenticated account.
 	AccountInfo() (AccountInfoOutput, error)
+	// AccountsInfo returns the information of all saved accounts.
+	AccountsInfo() (AccountsInfoOutput, error)
 	// Revoke revokes the active credentials.
 	Revoke() error
 	// Lookup looks apps up based on the specified bundle identifier.

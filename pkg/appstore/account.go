@@ -8,3 +8,8 @@ type Account struct {
 	StoreFront          string `json:"storeFront,omitempty"`
 	Password            string `json:"password,omitempty"`
 }
+
+type AccountStorage struct {
+	Accounts []Account `json:"accounts,omitempty"`
+	Current  string    `json:"current,omitempty"`
+}
